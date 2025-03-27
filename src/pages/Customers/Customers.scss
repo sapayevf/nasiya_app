@@ -1,0 +1,35 @@
+.customers {
+  padding: 20px;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  margin-bottom: 20px;
+}
+
+.peoples {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 20px;
+  .people {
+    position: relative;
+    width: 100%;
+    background-color: #f6f6f6;
+    padding: 15px;
+    border-radius: 14px;
+    .qarz {
+      color: #f94d4d;
+      font-size: 24px;
+      font-weight: 500;
+    }
+    .star {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+
+    }
+  }
+}

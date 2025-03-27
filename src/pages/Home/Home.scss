@@ -75,5 +75,9 @@ header {
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background-color: #3478F7;
+  background-color: #3478f7;
+}
+
+.custom-drawer .ant-drawer-content {
+  border-radius: 20px 20px 0 0;
 }

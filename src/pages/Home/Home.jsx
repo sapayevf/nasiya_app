@@ -2,12 +2,14 @@ import "./Home.scss";
 import user from "../../assets/user.png";
 import wallet from "../../assets/wallet.svg";
 import calendar from "../../assets/calendar.svg";
-import { Button } from "antd";
+import { Button, Drawer } from "antd";
 import { useState } from "react";
 import { EyeOutlined, EyeInvisibleOutlined } from "@ant-design/icons";
+import CalendarComponent from "../../components/Calendar/Calendar";
 
 const Home = () => {
   const [showBalance, setShowBalance] = useState(false);
+  const [openCalendar, setOpenCalendar] = useState(false);
 
   return (
     <div className="home">
@@ -17,6 +19,7 @@ const Home = () => {
           <h3>thesapayev</h3>
         </div>
         <Button
+          onClick={() => setOpenCalendar(true)}
           style={{
             padding: "6px",
             width: "50px",
@@ -27,6 +30,7 @@ const Home = () => {
           <img width={35} src={calendar} alt="" />
         </Button>
       </header>
+
       <div className="balans">
         <div>
           <h2 style={{ color: "white" }}>
@@ -38,9 +42,11 @@ const Home = () => {
         </div>
         <button className="hide" onClick={() => setShowBalance(!showBalance)}>
           {showBalance ? (
-            <EyeInvisibleOutlined width={20} style={{ color: "white" }} />
+            <EyeInvisibleOutlined
+              style={{ color: "white", fontSize: "24px" }}
+            />
           ) : (
-            <EyeOutlined width={20} style={{ color: "white" }} />
+            <EyeOutlined style={{ color: "white", fontSize: "24px" }} />
           )}
         </button>
       </div>
@@ -95,6 +101,11 @@ const Home = () => {
           <button className="add-balans">+</button>
         </div>
       </div>
+
+      <CalendarComponent
+        open={openCalendar}
+        onClose={() => setOpenCalendar(false)}
+      />
     </div>
   );
 };

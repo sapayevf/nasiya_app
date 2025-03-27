@@ -1,11 +1,12 @@
-import React from 'react'
+import React from "react";
+import Router from "./router/router";
 
 const App = () => {
   return (
     <div>
-      App
+      <Router></Router>
     </div>
-  )
-}
+  );
+};
 
-export default App
+export default App;

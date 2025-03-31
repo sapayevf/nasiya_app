@@ -63,6 +63,7 @@ const Customers = () => {
                   }))
                 }
                 className="star"
+                
               />
             </div>
           ))

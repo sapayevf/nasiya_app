@@ -6,17 +6,24 @@ import { Button, Drawer } from "antd";
 import { useState } from "react";
 import { EyeOutlined, EyeInvisibleOutlined } from "@ant-design/icons";
 import CalendarComponent from "../../components/Calendar/Calendar";
+import { useUserProfile } from "../../hooks/useAuth";
 
 const Home = () => {
   const [showBalance, setShowBalance] = useState(false);
   const [openCalendar, setOpenCalendar] = useState(false);
+  const token = localStorage.getItem("token");
+  const { userProfile, loading } = useUserProfile(token);
 
   return (
     <div className="home">
       <header>
         <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
           <img width={60} src={user} alt="" />
-          <h3>thesapayev</h3>
+          <h3>
+            {loading
+              ? "Yuklanmoqda..."
+              : userProfile?.data.login || "Foydalanuvchi"}
+          </h3>
         </div>
         <Button
           onClick={() => setOpenCalendar(true)}
@@ -30,11 +37,10 @@ const Home = () => {
           <img width={35} src={calendar} alt="" />
         </Button>
       </header>
-
       <div className="balans">
         <div>
           <h2 style={{ color: "white" }}>
-            {showBalance ? "135 214 200 so'm" : "******"}
+            {showBalance ? userProfile?.data.wallet : "******"}
           </h2>
           <p style={{ textAlign: "center", color: "#F6F6F6" }}>
             Umumiy nasiya:
@@ -62,12 +68,7 @@ const Home = () => {
             <h3>
               Mijozlar <br /> soni
             </h3>
-            <h5
-              className="count"
-              style={{
-                color: "#30AF49",
-              }}
-            >
+            <h5 className="count" style={{ color: "#30AF49" }}>
               151
             </h5>
           </div>
@@ -83,13 +84,7 @@ const Home = () => {
             justifyContent: "space-between",
           }}
         >
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "20px",
-            }}
-          >
+          <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
             <div className="wallet">
               <img src={wallet} alt="" />
             </div>
@@ -101,7 +96,6 @@ const Home = () => {
           <button className="add-balans">+</button>
         </div>
       </div>
-
       <CalendarComponent
         open={openCalendar}
         onClose={() => setOpenCalendar(false)}

@@ -1,78 +1,127 @@
-import { CiSearch } from "react-icons/ci";
-import "./Customers.scss";
-import { Input } from "antd";
-import { IoFilter } from "react-icons/io5";
-import { FaStar } from "react-icons/fa";
-import { useState, useEffect } from "react";
-import { fetchDebtors } from "../../hooks/useDebtor";
+import React, { useState } from "react";
+import { useDebtor } from "../hooks/useDebtor";
+import { Search, Plus, Trash2, Edit, Phone, MapPin } from "lucide-react";
+import { format } from "date-fns";
+import "../styles/customers.scss";
 
-const Customers = () => {
-  const [debtors, setDebtors] = useState([]);
-  const [like, setLike] = useState({});
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+function Customers() {
+  const [searchQuery, setSearchQuery] = useState("");
+  const {
+    debtors,
+    isLoading,
+    error,
+    deleteDebtor,
+    searchDebtors,
+    isDeletingDebtor,
+  } = useDebtor();
 
-  useEffect(() => {
-    const getDebtors = async () => {
-      try {
-        const data = await fetchDebtors();
-        if (Array.isArray(data)) {
-          setDebtors(data);
-        } else {
-          setDebtors([]);
-        }
-      } catch (error) {
-        console.error("Mijozlarni olishda xatolik:", error);
-        setError(error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    getDebtors();
-  }, []);
+  const handleSearch = async (e) => {
+    const value = e.target.value;
+    setSearchQuery(value);
+    if (value.length >= 2) {
+      await searchDebtors(value);
+    }
+  };
 
-  if (loading) return <p>Yuklanmoqda...</p>;
-  if (error) return <p>Xatolik yuz berdi: {error.message}</p>;
+  if (isLoading) {
+    return (
+      <div className="customers-page">
+        <div className="loading">
+          <div className="loading__spinner"></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="customers-page">
+        <div className="error">Error loading customers: {error.message}</div>
+      </div>
+    );
+  }
 
   return (
-    <div className="customers">
-      <header>
-        <Input
-          style={{ padding: "12px", borderRadius: "20px" }}
-          placeholder="Mijozlarni qidirish..."
-          prefix={<CiSearch size={30} />}
-          className="input"
+    <div className="customers-page">
+      <div className="header">
+        <h1 className="header__title">Customers</h1>
+        <button className="header__add-button">
+          <Plus />
+          Add Customer
+        </button>
+      </div>
+
+      <div className="search-bar">
+        <Search />
+        <input
+          type="text"
+          placeholder="Search customers..."
+          value={searchQuery}
+          onChange={handleSearch}
         />
-        <IoFilter size={35} />
-      </header>
-      <div className="peoples">
-        {debtors.length > 0 ? (
-          debtors.map((debtor) => (
-            <div key={debtor.id} className="people">
-              <h2>{debtor.name}</h2>
-              <p>{debtor.phone}</p> <br />
-              <p style={{ fontWeight: "600" }}>Jami nasiya:</p>
-              <p className="qarz">{debtor.debt} so‘m</p>
-              <FaStar
-                size={25}
-                color={like[debtor.id] ? "orange" : "gray"}
-                onClick={() =>
-                  setLike((prev) => ({
-                    ...prev,
-                    [debtor.id]: !prev[debtor.id],
-                  }))
-                }
-                className="star"
-                
-              />
-            </div>
-          ))
-        ) : (
-          <p>Hozircha hech qanday ma'lumot yo‘q</p>
-        )}
+      </div>
+
+      <div className="customers-table">
+        <table>
+          <thead>
+            <tr>
+              <th>Customer</th>
+              <th>Contact</th>
+              <th>Address</th>
+              <th>Created At</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {debtors?.map((customer) => (
+              <tr key={customer.id}>
+                <td>
+                  <div className="customer-info">
+                    <img
+                      className="customer-info__avatar"
+                      src={
+                        customer.avatar ||
+                        `https://ui-avatars.com/api/?name=${customer.name}`
+                      }
+                      alt={customer.name}
+                    />
+                    <span className="customer-info__name">{customer.name}</span>
+                  </div>
+                </td>
+                <td>
+                  <div className="contact-info">
+                    <Phone />
+                    {customer.phone}
+                  </div>
+                </td>
+                <td>
+                  <div className="address-info">
+                    <MapPin />
+                    {customer.address}
+                  </div>
+                </td>
+                <td>{format(new Date(customer.createdAt), "MMM dd, yyyy")}</td>
+                <td>
+                  <div className="actions">
+                    <button className="edit">
+                      <Edit />
+                    </button>
+                    <button
+                      className="delete"
+                      onClick={() => deleteDebtor(customer.id)}
+                      disabled={isDeletingDebtor}
+                    >
+                      <Trash2 />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );
-};
+}
 
 export default Customers;

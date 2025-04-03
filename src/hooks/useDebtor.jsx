@@ -20,7 +20,6 @@ const useDebtor = () => {
     const getDebtors = async () => {
       try {
         const data = await fetchDebtors();
-            
         setDebtors(data);
       } catch (err) {
         setError(err);

@@ -5,69 +5,29 @@ import {
   StarFilled,
   StarOutlined,
   UserAddOutlined,
-  PlusOutlined,
 } from "@ant-design/icons";
-import { Dropdown, Spin, Alert, message, Button } from "antd";
+import { Dropdown,Spin, Alert, message } from "antd";
 import AddDebtorModal from "../../components/AddDebtorModal";
-import AddDebtModal from "../../components/AddDebtModal";
-import { useDebtor } from "../../hooks/useDebtor";
+import useDebtor from "../../hooks/useDebtor";
 import "./Customers.scss";
 import { useNavigate } from "react-router";
-import debounce from "lodash/debounce";
 
 const Customers = () => {
-  const {
-    debtors,
-    loading,
-    error,
-    addDebtor,
-    updateFavorite,
-    setSearchQuery,
-    refetch,
-  } = useDebtor();
-
+  const { debtors, loading, error, addDebtor, refetch } = useDebtor();
   const [filterVisible, setFilterVisible] = useState(false);
-  const [isDebtorModalOpen, setIsDebtorModalOpen] = useState(false);
-  const [isDebtModalOpen, setIsDebtModalOpen] = useState(false);
-  const [selectedDebtorId, setSelectedDebtorId] = useState(null);
-  const navigate = useNavigate();
-
-  // Debounced search handler
-  const debouncedSearch = debounce((value) => {
-    setSearchQuery(value);
-  }, 300);
-
-  const handleSearch = (e) => {
-    debouncedSearch(e.target.value);
-  };
+  const [favorites, setFavorites] = useState({});
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const handleAddDebtor = async (debtorData) => {
     try {
       await addDebtor(debtorData);
-      message.success("Mijoz muvaffaqiyatli qo'shildi!");
-      setIsDebtorModalOpen(false);
+      message.success("Qarzdor muvaffaqiyatli qo'shildi!");
+      setIsModalOpen(false);
       refetch();
     } catch (err) {
-      message.error(err.message || "Mijozni qo'shishda xatolik yuz berdi");
+      message.error("Qarzdorni qo'shishda xatolik yuz berdi.");
     }
-  };
-
-  const handleToggleFavorite = async (e, debtorId, currentFavorite) => {
-    e.stopPropagation();
-    try {
-      await updateFavorite(debtorId, !currentFavorite);
-      message.success("Mijoz holati yangilandi");
-    } catch (err) {
-      message.error(
-        err.message || "Mijoz holatini yangilashda xatolik yuz berdi"
-      );
-    }
-  };
-
-  const handleOpenDebtModal = (e, debtorId) => {
-    e.stopPropagation();
-    setSelectedDebtorId(debtorId);
-    setIsDebtModalOpen(true);
   };
 
   const menuItems = [
@@ -77,16 +37,19 @@ const Customers = () => {
     { key: "4", label: "No-faol mijozlar" },
   ];
 
+  const toggleFavorite = (id) => {
+    setFavorites((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  const navigate = useNavigate();
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
-  const calculateTotalDebt = (debts) => {
-    return debts.reduce(
-      (sum, debt) => sum + parseFloat(debt.debt_sum || "0"),
-      0
-    );
-  };
+  const filteredDebtors = debtors?.filter((debtor) =>
+    debtor.full_name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <section className="customers">
@@ -99,7 +62,8 @@ const Customers = () => {
             <input
               type="text"
               placeholder="Mijozlarni qidirish..."
-              onChange={handleSearch}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
             />
             <SearchOutlined className="customers__search-icon" />
           </form>
@@ -122,9 +86,12 @@ const Customers = () => {
           <Alert message={error} type="error" />
         ) : (
           <div className="customers__list">
-            {debtors.length > 0 ? (
-              debtors.map((customer) => {
-                const totalDebt = calculateTotalDebt(customer.debts);
+            {Array.isArray(filteredDebtors) && filteredDebtors.length > 0 ? (
+              filteredDebtors.map((customer) => {
+                const totalDebt = customer.debts.reduce(
+                  (sum, debt) => sum + parseFloat(debt.debt_sum || "0"),
+                  0
+                );
                 return (
                   <div
                     key={customer.id}
@@ -132,26 +99,7 @@ const Customers = () => {
                     onClick={() => navigate(`/customer/${customer.id}`)}
                   >
                     <div className="customers__info">
-                      <div className="customers__header">
-                        <h3 className="customers__name">
-                          {customer.full_name}
-                        </h3>
-                        <div className="customers__actions">
-                          
-                          <div
-                            className="customers__favorite"
-                            onClick={(e) =>
-                              handleToggleFavorite(
-                                e,
-                                customer.id,
-                                customer.is_favorite
-                              )
-                            }
-                          >
-                           <br />
-                          </div>
-                        </div>
-                      </div>
+                      <h3 className="customers__name">{customer.full_name}</h3>
                       <p className="customers__phone">
                         {customer.phone_numbers.length > 0
                           ? customer.phone_numbers[0].number
@@ -166,6 +114,19 @@ const Customers = () => {
                         {totalDebt.toLocaleString()} so'm
                       </p>
                     </div>
+                    <div
+                      className="customers__favorite"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleFavorite(customer.id);
+                      }}
+                    >
+                      {favorites[customer.id] ? (
+                        <StarFilled className="star-icon active" />
+                      ) : (
+                        <StarOutlined className="star-icon" />
+                      )}
+                    </div>
                   </div>
                 );
               })
@@ -175,31 +136,21 @@ const Customers = () => {
           </div>
         )}
 
-        <button
-          className="customers__add"
-          onClick={() => setIsDebtModalOpen(true)}
-        >
-          <UserAddOutlined />
-        </button>
+        {!loading && (
+          <button
+            className="customers__add"
+            onClick={() => setIsModalOpen(true)}
+          >
+            <UserAddOutlined />
+            
+          </button>
+        )}
       </div>
 
       <AddDebtorModal
-        isOpen={isDebtorModalOpen}
-        onClose={() => setIsDebtorModalOpen(false)}
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
         onAddDebtor={handleAddDebtor}
-      />
-
-      <AddDebtModal
-        isOpen={isDebtModalOpen}
-        onClose={() => {
-          setIsDebtModalOpen(false);
-          setSelectedDebtorId(null);
-        }}
-        debtorId={selectedDebtorId}
-        onSuccess={() => {
-          refetch();
-          message.success("Nasiya muvaffaqiyatli qo'shildi!");
-        }}
       />
     </section>
   );

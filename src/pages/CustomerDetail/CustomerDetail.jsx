@@ -15,29 +15,9 @@ import "./CustomerDetail.scss";
 const CustomerDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { getDebtorById, deleteDebtor, loading, error } = useDebtor();
-  const [debtor, setDebtor] = useState(null);
+  const { useDebtorById, deleteDebtor } = useDebtor();
+  const { data: debtor, isLoading: loading, error } = useDebtorById(id);
   const [isDebtModalOpen, setIsDebtModalOpen] = useState(false);
-
-  console.log("Current ID:", id);
-  useEffect(() => {
-    fetchDebtorDetails();
-  }, [id]);
-
-  const fetchDebtorDetails = async () => {
-    try {
-      console.log("Fetching debtor details for ID:", id);
-      const response = await getDebtorById(id);
-      console.log("API Response:", response);
-      setDebtor(response);
-    } catch (err) {
-      console.error("Error fetching debtor:", err);
-      message.error("Ma'lumotlarni yuklashda xatolik yuz berdi");
-    }
-  };
-  console.log("Current debtor state:", debtor); // Debug log
-  console.log("Loading state:", loading); // Debug log
-  console.log("Error state:", error);
 
   const calculateTotalDebt = (debts = []) => {
     return debts.reduce((sum, debt) => {
@@ -69,7 +49,7 @@ const CustomerDetail = () => {
   if (error) {
     return (
       <div className="customer-detail__error">
-        <p>{error}</p>
+        <p>{error.message}</p>
         <Button onClick={() => navigate("/customers")}>Orqaga</Button>
       </div>
     );
@@ -159,7 +139,6 @@ const CustomerDetail = () => {
         onClose={() => setIsDebtModalOpen(false)}
         debtorId={id}
         onSuccess={() => {
-          fetchDebtorDetails();
           setIsDebtModalOpen(false);
         }}
       />

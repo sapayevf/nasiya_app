@@ -1,0 +1,58 @@
+.terms-settings {
+  background-color: #fff;
+  min-height: 100vh;
+
+  .settings-header {
+    display: flex;
+    align-items: center;
+    padding: 16px;
+    border-bottom: 1px solid #f5f5f5;
+
+    .back-button {
+      color: #333;
+      margin-right: 16px;
+      text-decoration: none;
+
+      i {
+        font-size: 18px;
+      }
+    }
+
+    h2 {
+      font-size: 18px;
+      font-weight: 600;
+      margin: 0;
+      color: #333;
+    }
+  }
+
+  .settings-content {
+    padding: 16px;
+
+    .terms-content {
+      h3 {
+        font-size: 16px;
+        font-weight: 600;
+        color: #333;
+        margin: 0 0 16px 0;
+      }
+
+      .terms-text {
+        background-color: #f8f8f8;
+        border-radius: 8px;
+        padding: 16px;
+
+        p {
+          font-size: 14px;
+          line-height: 1.5;
+          color: #666;
+          margin: 0;
+
+          &:not(:last-child) {
+            margin-bottom: 12px;
+          }
+        }
+      }
+    }
+  }
+}

@@ -18,7 +18,7 @@ const Menu = () => {
         <FaFile size={30} color="gray" />
         Hisobot
       </NavLink>
-      <NavLink className="item">
+      <NavLink to="/settings" className="item">
         <IoMdSettings size={30} color="gray" />
         Sozlama
       </NavLink>
